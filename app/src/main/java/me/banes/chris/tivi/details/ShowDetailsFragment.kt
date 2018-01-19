@@ -30,9 +30,13 @@ import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_show_details.*
 import me.banes.chris.tivi.R
+import me.banes.chris.tivi.SharedElementHelper
 import me.banes.chris.tivi.TiviFragment
+import me.banes.chris.tivi.data.entities.TiviShow
 import me.banes.chris.tivi.extensions.doWhenLaidOut
 import me.banes.chris.tivi.extensions.observeK
+import me.banes.chris.tivi.home.HomeNavigator
+import me.banes.chris.tivi.home.HomeNavigatorViewModel
 import me.banes.chris.tivi.ui.GlidePaletteListener
 import me.banes.chris.tivi.ui.NoopApplyWindowInsetsListener
 import me.banes.chris.tivi.ui.RoundRectViewOutline
@@ -54,13 +58,34 @@ class ShowDetailsFragment : TiviFragment() {
         }
     }
 
+    private val callbacks = object : ShowDetailsEpoxyController.Callbacks {
+        override fun onItemClicked(item: TiviShow) {
+            val sharedElementHelper = SharedElementHelper()
+            addSharedElementEntry(item, sharedElementHelper, "poster")
+            viewModel.onItemPostedClicked(homeNavigator, item, sharedElementHelper)
+        }
+
+        private fun addSharedElementEntry(
+                show: TiviShow,
+                sharedElementHelper: SharedElementHelper,
+                transitionName: String? = show.homepage
+        ) {
+            details_rv.findViewHolderForItemId(show.traktId!!.toLong())?.let {
+                sharedElementHelper.addSharedElement(it.itemView, transitionName)
+            }
+        }
+    }
+
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
+    private lateinit var homeNavigator: HomeNavigator
+
     private lateinit var viewModel: ShowDetailsFragmentViewModel
     private lateinit var epoxyController: ShowDetailsEpoxyController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(ShowDetailsFragmentViewModel::class.java)
+        homeNavigator = ViewModelProviders.of(activity!!, viewModelFactory).get(HomeNavigatorViewModel::class.java)
 
         arguments?.let {
             viewModel.showId = it.getLong(KEY_SHOW_ID)
@@ -73,7 +98,7 @@ class ShowDetailsFragment : TiviFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        epoxyController = ShowDetailsEpoxyController(view.context)
+        epoxyController = ShowDetailsEpoxyController(view.context, callbacks)
         details_rv.setController(epoxyController)
 
         details_backdrop.setOnApplyWindowInsetsListener(NoopApplyWindowInsetsListener)

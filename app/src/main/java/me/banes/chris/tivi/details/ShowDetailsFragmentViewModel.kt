@@ -19,7 +19,9 @@ package me.banes.chris.tivi.details
 import android.arch.lifecycle.LiveDataReactiveStreams
 import android.arch.lifecycle.MutableLiveData
 import io.reactivex.rxkotlin.plusAssign
+import me.banes.chris.tivi.SharedElementHelper
 import me.banes.chris.tivi.data.entities.TiviShow
+import me.banes.chris.tivi.home.HomeNavigator
 import me.banes.chris.tivi.tmdb.TmdbManager
 import me.banes.chris.tivi.trakt.calls.ShowDetailsCall
 import me.banes.chris.tivi.trakt.calls.ShowRelatedCall
@@ -74,5 +76,9 @@ class ShowDetailsFragmentViewModel @Inject constructor(
 
     private fun onRefreshError(t: Throwable) {
         Timber.e(t, "Error while refreshing")
+    }
+
+    fun onItemPostedClicked(navigator: HomeNavigator, show: TiviShow, sharedElements: SharedElementHelper?) {
+        navigator.showShowDetails(show, sharedElements)
     }
 }

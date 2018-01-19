@@ -17,6 +17,7 @@
 package me.banes.chris.tivi.details
 
 import android.content.Context
+import android.view.View
 import com.airbnb.epoxy.EpoxyController
 import me.banes.chris.tivi.R
 import me.banes.chris.tivi.data.entities.TiviShow
@@ -28,7 +29,14 @@ import me.banes.chris.tivi.posterGridItem
 import me.banes.chris.tivi.tmdb.TmdbImageUrlProvider
 import me.banes.chris.tivi.ui.epoxy.TotalSpanOverride
 
-class ShowDetailsEpoxyController(private val context: Context) : EpoxyController() {
+class ShowDetailsEpoxyController(
+        private val context: Context,
+        private val callbacks: Callbacks
+) : EpoxyController() {
+
+    interface Callbacks {
+        fun onItemClicked(item: TiviShow)
+    }
 
     var show : TiviShow? = null
         set(value) {
@@ -114,10 +122,13 @@ class ShowDetailsEpoxyController(private val context: Context) : EpoxyController
 
             for (show in relatedShows!!) {
                 posterGridItem {
-                    id(show.traktId)
+                    id(show.traktId!!.toLong())
                     title(show.title)
                     tmdbImageUrlProvider(imageProvider)
                     posterPath(show.tmdbPosterPath)
+                    clickListener(View.OnClickListener {
+                        callbacks.onItemClicked(show)
+                    })
                 }
             }
         }
