@@ -23,6 +23,7 @@ import android.widget.TextView
 import me.banes.chris.tivi.data.entities.Genre
 import me.banes.chris.tivi.extensions.doWhenLaidOut
 import me.banes.chris.tivi.extensions.loadFromUrl
+import me.banes.chris.tivi.extensions.useNbsps
 import me.banes.chris.tivi.tmdb.TmdbImageUrlProvider
 import me.banes.chris.tivi.ui.GenreStringer
 import me.banes.chris.tivi.ui.MaxLinesToggleClickListener
@@ -38,8 +39,8 @@ fun loadPoster(view: ImageView, posterPath: String?, tmdbImageUrlProvider: TmdbI
 
 @BindingAdapter(value = ["android:genreString"])
 fun genreString(view: TextView, genres: List<Genre>?) {
-    val genreText = genres?.joinToString(" • ") {
-        "${view.context.getString(GenreStringer.getLabel(it))} ${GenreStringer.getEmoji(it)}"
+    val genreText = genres?.joinToString("\u00A0• ") {
+        "${view.context.getString(GenreStringer.getLabel(it))} ${GenreStringer.getEmoji(it)}".useNbsps()
     }
     view.text = genreText
 }
