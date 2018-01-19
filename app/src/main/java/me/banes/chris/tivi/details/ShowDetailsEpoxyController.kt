@@ -38,7 +38,7 @@ class ShowDetailsEpoxyController(
         fun onItemClicked(item: TiviShow)
     }
 
-    var show : TiviShow? = null
+    var show: TiviShow? = null
         set(value) {
             if (value != field) {
                 field = value
@@ -46,7 +46,7 @@ class ShowDetailsEpoxyController(
             }
         }
 
-    var imageProvider : TmdbImageUrlProvider? = null
+    var imageProvider: TmdbImageUrlProvider? = null
         set(value) {
             if (value != field) {
                 field = value
@@ -54,14 +54,13 @@ class ShowDetailsEpoxyController(
             }
         }
 
-    var relatedShows : List<TiviShow>? = null
+    var relatedShows: List<TiviShow>? = null
         set(value) {
             if (value != field) {
                 field = value
                 requestModelBuild()
             }
         }
-
 
     override fun buildModels() {
         detailsTitle {
