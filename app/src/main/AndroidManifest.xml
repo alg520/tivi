@@ -45,8 +45,7 @@
         </activity>
 
         <activity
-            android:name=".details.ShowDetailsActivity"
-            android:theme="@style/Theme.Tivi.Light.Immerse"/>
+            android:name=".details.ShowDetailsActivity" />
 
         <meta-data
             android:name="io.fabric.ApiKey"

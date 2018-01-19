@@ -16,7 +16,6 @@
 
 package me.banes.chris.tivi.details
 
-import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
@@ -41,7 +40,6 @@ import me.banes.chris.tivi.home.HomeNavigatorViewModel
 import me.banes.chris.tivi.ui.GlidePaletteListener
 import me.banes.chris.tivi.ui.NoopApplyWindowInsetsListener
 import me.banes.chris.tivi.ui.RoundRectViewOutline
-import me.banes.chris.tivi.ui.transitions.ColorDrawableProperty
 import me.banes.chris.tivi.ui.transitions.DrawableAlphaProperty
 import me.banes.chris.tivi.util.ScrimUtil
 import javax.inject.Inject
@@ -118,16 +116,10 @@ class ShowDetailsFragment : TiviFragment() {
     }
 
     private fun onBackdropPaletteLoaded(palette: Palette) {
-        val currentBackgroundColor = (details_coordinator.background as ColorDrawable).color
-
         palette.dominantSwatch?.let {
-            val background = ColorDrawable(currentBackgroundColor)
+            val background = ColorDrawable(it.rgb)
             details_coordinator.background = background
-            ObjectAnimator.ofInt(background, ColorDrawableProperty, currentBackgroundColor, it.rgb)
-                    .run {
-                        setEvaluator(ArgbEvaluator())
-                        start()
-                    }
+            ObjectAnimator.ofInt(background, DrawableAlphaProperty, 0, 255).start()
 
             val scrim = ScrimUtil.makeCubicGradientScrimDrawable(it.rgb, 10, Gravity.BOTTOM)
             val drawable = LayerDrawable(arrayOf(scrim)).apply {
