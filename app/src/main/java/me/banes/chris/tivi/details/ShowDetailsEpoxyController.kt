@@ -120,7 +120,7 @@ class ShowDetailsEpoxyController(
                 spanSizeOverride(TotalSpanOverride)
             }
 
-            for (show in relatedShows!!) {
+            for (show in relatedShows?.take(spanCount) ?: emptyList()) {
                 posterGridItem {
                     id(show.traktId!!.toLong())
                     title(show.title)

@@ -41,7 +41,7 @@ class ShowRelatedCall @Inject constructor(
     private val related = BehaviorSubject.createDefault<List<TiviShow>>(emptyList())
 
     override fun refresh(param: Long): Completable {
-        return trakt.shows().related(param.toString(), 1, 10, Extended.NOSEASONS).toRxSingle()
+        return trakt.shows().related(param.toString(), 1, 6, Extended.NOSEASONS).toRxSingle()
                 .subscribeOn(schedulers.network)
                 .observeOn(schedulers.database)
                 .toFlowable()
