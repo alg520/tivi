@@ -47,6 +47,7 @@ class DiscoverEpoxyController(
             id("trending_header")
             title(R.string.discover_trending)
             spanSizeOverride(TotalSpanOverride)
+            buttonTitle(R.string.header_more)
             buttonClickListener(View.OnClickListener {
                 callbacks.onTrendingHeaderClicked(trending)
             })
@@ -76,6 +77,7 @@ class DiscoverEpoxyController(
             id("popular_header")
             title(R.string.discover_popular)
             spanSizeOverride(TotalSpanOverride)
+            buttonTitle(R.string.header_more)
             buttonClickListener(View.OnClickListener {
                 callbacks.onPopularHeaderClicked(popular)
             })

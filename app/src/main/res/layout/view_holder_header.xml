@@ -53,10 +53,11 @@
             android:layout_marginStart="@dimen/header_margin"
             android:gravity="center_vertical"
             android:onClick="@{buttonClickListener}"
-            android:text="@{buttonTitle != 0 ? context.getString(buttonTitle) : @string/header_more}"
+            android:text="@{buttonTitle != 0 ? context.getString(buttonTitle) : null}"
             android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textColor="@color/colorAccent" />
+            android:textColor="@color/colorAccent"
+            android:visibleIfNotNull="@{buttonClickListener}" />
 
     </FrameLayout>
 </layout>

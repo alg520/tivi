@@ -44,6 +44,7 @@ class LibraryEpoxyController(
             id("watched_header")
             title(R.string.library_watched)
             spanSizeOverride(TotalSpanOverride)
+            buttonTitle(R.string.header_more)
             buttonClickListener(View.OnClickListener {
                 callbacks.onWatchedHeaderClicked(watched)
             })
