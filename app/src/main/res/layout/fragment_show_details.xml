@@ -66,6 +66,7 @@
         android:layout_marginRight="12dp"
         android:background="@drawable/round_rect_background"
         android:elevation="2dp"
+        android:padding="2dp"
         app:layoutManager="android.support.v7.widget.GridLayoutManager"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:spanCount="4" />

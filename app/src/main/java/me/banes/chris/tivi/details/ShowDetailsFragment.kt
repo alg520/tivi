@@ -40,6 +40,7 @@ import me.banes.chris.tivi.home.HomeNavigatorViewModel
 import me.banes.chris.tivi.ui.GlidePaletteListener
 import me.banes.chris.tivi.ui.NoopApplyWindowInsetsListener
 import me.banes.chris.tivi.ui.RoundRectViewOutline
+import me.banes.chris.tivi.ui.SpacingItemDecorator
 import me.banes.chris.tivi.ui.transitions.DrawableAlphaProperty
 import me.banes.chris.tivi.util.ScrimUtil
 import javax.inject.Inject
@@ -100,6 +101,7 @@ class ShowDetailsFragment : TiviFragment() {
 
         epoxyController = ShowDetailsEpoxyController(view.context, callbacks)
         details_rv.setController(epoxyController)
+        details_rv.addItemDecoration(SpacingItemDecorator(details_rv.paddingTop))
 
         details_backdrop.setOnApplyWindowInsetsListener(NoopApplyWindowInsetsListener)
 
