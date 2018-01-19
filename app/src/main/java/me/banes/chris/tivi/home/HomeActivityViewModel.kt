@@ -82,7 +82,7 @@ internal class HomeActivityViewModel @Inject constructor(
 
     private fun refreshShowFromTmdb(show: TiviShow) {
         Timber.d("Updating show from TMDb: %s", show)
-        disposables += tmdbShowFetcher.updateShow(show.tmdbId!!)
+        disposables += tmdbShowFetcher.getShow(show.tmdbId!!)
                 .subscribe({
                     Timber.d("Updated show from TMDb %s", show)
                 }, {

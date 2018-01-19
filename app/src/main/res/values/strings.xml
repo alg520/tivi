@@ -56,4 +56,6 @@
     <string name="genre_label_horror">Horror</string>
     <string name="genre_label_mystery">Mystery</string>
 
+    <string name="related_title">Related shows</string>
+
 </resources>

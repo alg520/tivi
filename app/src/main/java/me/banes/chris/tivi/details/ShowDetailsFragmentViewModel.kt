@@ -16,11 +16,13 @@
 
 package me.banes.chris.tivi.details
 
+import android.arch.lifecycle.LiveDataReactiveStreams
 import android.arch.lifecycle.MutableLiveData
-import io.reactivex.rxkotlin.Flowables
 import io.reactivex.rxkotlin.plusAssign
+import me.banes.chris.tivi.data.entities.TiviShow
 import me.banes.chris.tivi.tmdb.TmdbManager
 import me.banes.chris.tivi.trakt.calls.ShowDetailsCall
+import me.banes.chris.tivi.trakt.calls.ShowRelatedCall
 import me.banes.chris.tivi.util.AppRxSchedulers
 import me.banes.chris.tivi.util.RxAwareViewModel
 import timber.log.Timber
@@ -29,39 +31,40 @@ import javax.inject.Inject
 class ShowDetailsFragmentViewModel @Inject constructor(
         private val schedulers: AppRxSchedulers,
         private val showCall: ShowDetailsCall,
-        private val tmdbManager: TmdbManager
+        private val relatedCall: ShowRelatedCall,
+        tmdbManager: TmdbManager
 ) : RxAwareViewModel() {
+
+    val show = MutableLiveData<TiviShow>()
+    val relatedShows = MutableLiveData<List<TiviShow>>()
+
+    val tmdbImageUrlProvider = LiveDataReactiveStreams.fromPublisher(tmdbManager.imageProvider)!!
 
     var showId: Long? = null
         set(value) {
             if (field != value) {
                 field = value
-                if (value != null) {
-                    setupLiveData()
-                    refresh()
-                } else {
-                    data.value = null
-                }
+                refresh()
             }
         }
 
-    val data = MutableLiveData<ShowDetailsFragmentViewState>()
-
     private fun refresh() {
+        disposables.clear()
+
         showId?.let {
+            disposables += relatedCall.data(it)
+                    .observeOn(schedulers.main)
+                    .subscribe(relatedShows::setValue, Timber::e)
+
             disposables += showCall.refresh(it)
                     .subscribe(this::onRefreshSuccess, this::onRefreshError)
-        }
-    }
 
-    private fun setupLiveData() {
-        showId?.let {
-            disposables += Flowables.combineLatest(
-                    showCall.data(it),
-                    tmdbManager.imageProvider,
-                    ::ShowDetailsFragmentViewState)
+            disposables += showCall.data(it)
                     .observeOn(schedulers.main)
-                    .subscribe(data::setValue, Timber::e)
+                    .subscribe({
+                        show.value = it
+                        disposables += relatedCall.refresh(it.traktId!!.toLong()).subscribe()
+                    }, Timber::e)
         }
     }
 

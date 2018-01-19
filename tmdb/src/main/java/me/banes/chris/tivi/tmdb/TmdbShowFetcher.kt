@@ -18,7 +18,7 @@ package me.banes.chris.tivi.tmdb
 
 import android.support.v4.util.ArraySet
 import com.uwetrottmann.tmdb2.Tmdb
-import io.reactivex.Completable
+import io.reactivex.Single
 import me.banes.chris.tivi.data.daos.TiviShowDao
 import me.banes.chris.tivi.data.entities.TiviShow
 import me.banes.chris.tivi.extensions.toRxSingle
@@ -42,7 +42,7 @@ class TmdbShowFetcher @Inject constructor(
         return show.needsUpdateFromTmdb() && !active.contains(show.tmdbId)
     }
 
-    fun updateShow(tmdbId: Int): Completable {
+    fun getShow(tmdbId: Int): Single<TiviShow> {
         val networkSource = tmdb.tvService().tv(tmdbId).toRxSingle()
                 .subscribeOn(schedulers.network)
                 .retryWhen(RetryAfterTimeoutWithDelay(3, 1000, this::shouldRetry, schedulers.network))
@@ -61,7 +61,6 @@ class TmdbShowFetcher @Inject constructor(
                     showDao.insertOrUpdateShow(show)
                 }
                 .doOnDispose { active.remove(tmdbId) }
-                .toCompletable()
 
         active += tmdbId
 

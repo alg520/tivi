@@ -31,17 +31,11 @@ import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_show_details.*
 import me.banes.chris.tivi.R
 import me.banes.chris.tivi.TiviFragment
-/* ktlint-disable no-unused-imports */
-import me.banes.chris.tivi.detailsBadge
-import me.banes.chris.tivi.detailsSummary
-import me.banes.chris.tivi.detailsTitle
-/* ktlint-disable no-unused-imports */
 import me.banes.chris.tivi.extensions.doWhenLaidOut
 import me.banes.chris.tivi.extensions.observeK
 import me.banes.chris.tivi.ui.GlidePaletteListener
 import me.banes.chris.tivi.ui.NoopApplyWindowInsetsListener
 import me.banes.chris.tivi.ui.RoundRectViewOutline
-import me.banes.chris.tivi.ui.epoxy.TotalSpanOverride
 import me.banes.chris.tivi.ui.transitions.DrawableAlphaProperty
 import me.banes.chris.tivi.util.ScrimUtil
 import javax.inject.Inject
@@ -61,8 +55,8 @@ class ShowDetailsFragment : TiviFragment() {
     }
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
-
     private lateinit var viewModel: ShowDetailsFragmentViewModel
+    private lateinit var epoxyController: ShowDetailsEpoxyController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +73,9 @@ class ShowDetailsFragment : TiviFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        epoxyController = ShowDetailsEpoxyController(view.context)
+        details_rv.setController(epoxyController)
+
         details_backdrop.setOnApplyWindowInsetsListener(NoopApplyWindowInsetsListener)
 
         details_poster.clipToOutline = true
@@ -88,9 +85,9 @@ class ShowDetailsFragment : TiviFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel.data.observeK(this) {
-            it?.let(this::update)
-        }
+        viewModel.show.observeK(this) { update() }
+        viewModel.relatedShows.observeK(this) { update() }
+        viewModel.tmdbImageUrlProvider.observeK(this) { update() }
     }
 
     private fun onBackdropPaletteLoaded(palette: Palette) {
@@ -109,77 +106,31 @@ class ShowDetailsFragment : TiviFragment() {
         }
     }
 
-    private fun update(viewState: ShowDetailsFragmentViewState) {
-        val show = viewState.show
-        val imageProvider = viewState.tmdbImageUrlProvider
+    private fun update() {
+        val show = viewModel.show.value
+        val relatedShows = viewModel.relatedShows.value
+        val imageProvider = viewModel.tmdbImageUrlProvider.value
 
-        show.tmdbBackdropPath?.let { path ->
+        show?.tmdbBackdropPath?.let { path ->
             details_backdrop.doWhenLaidOut {
                 Glide.with(this)
-                        .load(imageProvider.getBackdropUrl(path, details_backdrop.width))
+                        .load(imageProvider?.getBackdropUrl(path, details_backdrop.width))
                         .listener(GlidePaletteListener(this::onBackdropPaletteLoaded))
                         .into(details_backdrop)
             }
         }
 
-        show.tmdbPosterPath?.let { path ->
+        show?.tmdbPosterPath?.let { path ->
             details_poster.doWhenLaidOut {
                 Glide.with(this)
-                        .load(imageProvider.getPosterUrl(path, details_poster.width))
+                        .load(imageProvider?.getPosterUrl(path, details_poster.width))
                         .into(details_poster)
             }
         }
 
-        details_rv.buildModelsWith { controller ->
-            controller.detailsTitle {
-                id("title")
-                title(show.title)
-                subtitle(show.originalTitle)
-                genres(show.genres)
-                spanSizeOverride(TotalSpanOverride)
-            }
-
-            show.rating?.let { rating ->
-                controller.detailsBadge {
-                    val ratingOutOfOneHundred = Math.round(rating * 10)
-                    id("rating")
-                    label(context?.getString(R.string.percentage_format, ratingOutOfOneHundred))
-                    icon(R.drawable.ic_details_rating)
-                    contentDescription(context?.getString(R.string.rating_content_description_format, ratingOutOfOneHundred))
-                }
-            }
-            show.network?.let { network ->
-                controller.detailsBadge {
-                    id("network")
-                    label(network)
-                    icon(R.drawable.ic_details_network)
-                    contentDescription(context?.getString(R.string.network_content_description_format, network))
-                }
-            }
-            show.certification?.let { certificate ->
-                controller.detailsBadge {
-                    id("cert")
-                    label(certificate)
-                    icon(R.drawable.ic_details_certificate)
-                    contentDescription(context?.getString(R.string.certificate_content_description_format, certificate))
-                }
-            }
-            show.runtime?.let { runtime ->
-                controller.detailsBadge {
-                    val runtimeMinutes = context?.getString(R.string.minutes_format, runtime)
-                    id("runtime")
-                    label(runtimeMinutes)
-                    icon(R.drawable.ic_details_runtime)
-                    contentDescription(context?.resources?.getQuantityString(R.plurals.runtime_content_description_format, runtime, runtime))
-                }
-            }
-
-            controller.detailsSummary {
-                id("summary")
-                summary(show.summary)
-                spanSizeOverride(TotalSpanOverride)
-            }
-        }
+        epoxyController.show = show
+        epoxyController.relatedShows = relatedShows
+        epoxyController.imageProvider = imageProvider
 
         scheduleStartPostponedTransitions()
     }

@@ -38,7 +38,7 @@ fun loadPoster(view: ImageView, posterPath: String?, tmdbImageUrlProvider: TmdbI
 
 @BindingAdapter(value = ["android:genreString"])
 fun genreString(view: TextView, genres: List<Genre>?) {
-    val genreText = genres?.joinToString(" // ") {
+    val genreText = genres?.joinToString(" • ") {
         "${view.context.getString(GenreStringer.getLabel(it))} ${GenreStringer.getEmoji(it)}"
     }
     view.text = genreText

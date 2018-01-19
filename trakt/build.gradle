@@ -45,10 +45,11 @@ android {
 dependencies {
     api project(":base")
     implementation project(":data")
+    implementation project(":tmdb")
 
     kapt "com.google.dagger:dagger-compiler:${versions.dagger}"
 
-    api("com.uwetrottmann.trakt5:trakt-java:5.7.3", {
+    api("com.uwetrottmann.trakt5:trakt-java:5.8.0", {
         // Exclude this since we explicitly depend on threetenbp:no-tzdb above
         exclude group: 'org.threeten', module: 'threetenbp'
     })
