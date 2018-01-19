@@ -17,6 +17,7 @@
 package me.banes.chris.tivi.details
 
 import android.content.Context
+import android.graphics.Rect
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.RecyclerView
@@ -24,6 +25,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
 import me.banes.chris.tivi.R
+import me.banes.chris.tivi.extensions.getDescendantViewRect
 
 class DetailPosterBehavior(context: Context, attrs: AttributeSet?) : CoordinatorLayout.Behavior<ImageView>(context, attrs) {
 
@@ -31,36 +33,36 @@ class DetailPosterBehavior(context: Context, attrs: AttributeSet?) : Coordinator
         return dependency is RecyclerView
     }
 
-    override fun onLayoutChild(parent: CoordinatorLayout, child: ImageView, layoutDirection: Int): Boolean {
-        // Let the parent layout the child first
-        parent.onLayoutChild(child, layoutDirection)
+    override fun onLayoutChild(parent: CoordinatorLayout, poster: ImageView, layoutDirection: Int): Boolean {
+        // Let the parent layout the poster first
+        parent.onLayoutChild(poster, layoutDirection)
 
-        val posterLp = child.layoutParams as CoordinatorLayout.LayoutParams
-        val rv = parent.findViewById<RecyclerView>(R.id.details_rv)
-
-        val firstChildItemRv = rv.findViewHolderForAdapterPosition(0)
-        if (firstChildItemRv != null) {
-            // This is the title item
-            val childView = firstChildItemRv.itemView
-            ViewCompat.offsetLeftAndRight(child, posterLp.marginStart + (childView.left + rv.left) - child.left)
-            ViewCompat.offsetTopAndBottom(child, childView.bottom + rv.top - childView.paddingBottom - child.bottom)
-        }
+        offsetPoster(parent, poster, parent.findViewById(R.id.details_rv))
         return true
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, poster: ImageView, dependency: View): Boolean {
-        val rv = dependency as RecyclerView
+        offsetPoster(parent, poster, dependency as RecyclerView)
+        return true
+    }
+
+    private fun offsetPoster(parent: CoordinatorLayout, poster: ImageView, recyclerView: RecyclerView) {
         val posterLp = poster.layoutParams as CoordinatorLayout.LayoutParams
 
-        val firstChildItemRv = rv.findViewHolderForAdapterPosition(0)
+        val firstChildItemRv = recyclerView.findViewHolderForAdapterPosition(0)
         if (firstChildItemRv != null) {
-            // This is the title item
-            val childView = firstChildItemRv.itemView
-            poster.translationX = (posterLp.marginStart + (childView.left + rv.left) - poster.left).toFloat()
-            poster.translationY = ((childView.bottom + rv.top - childView.paddingBottom) - poster.bottom).toFloat()
-            return true
-        }
+            val childRect = Rect()
+            parent.getDescendantViewRect(firstChildItemRv.itemView, childRect)
 
-        return false
+            ViewCompat.offsetLeftAndRight(poster, posterLp.marginStart + childRect.left - poster.left)
+            ViewCompat.offsetTopAndBottom(poster, childRect.bottom - poster.bottom)
+
+            if (recyclerView.top < childRect.height()) {
+                // shrink
+                //ObjectAnimator.ofFloa
+            } else {
+                // grow
+            }
+        }
     }
 }
